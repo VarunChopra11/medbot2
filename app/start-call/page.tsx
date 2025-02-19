@@ -402,7 +402,7 @@ export default function Page() {
           <div className="z-[2] bg-black/60 relative flex-[0_1_45px] w-full h-[45px] flex items-center px-4 justify-between">
             <div className="flex items-center gap-2">
               <img
-                src="https://aitherapist.callb.ac/img/therapist-lg.png"
+                src="therapist.png"
                 alt=""
                 className="w-[35px] h-[35px] rounded-full"
               />
@@ -445,8 +445,8 @@ export default function Page() {
                   <img
                     src={
                       audioStates[message.id]?.isPlaying
-                        ? "https://aitherapist.callb.ac/img/pause_icon.svg"
-                        : "https://aitherapist.callb.ac/img/play_icon.svg"
+                        ? "pause.png "
+                        : "play.png"
                     }
                     alt="Play/Pause"
                     className="w-[30px] h-[30px] mx-auto"
