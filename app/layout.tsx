@@ -7,7 +7,7 @@ import { cn } from "@/utils";
 import { Poppins } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "My AI Therapist",
+  title: "Havenly Therapy",
   description: "AI Therapist for everyone",
 };
 

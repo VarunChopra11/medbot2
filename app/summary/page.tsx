@@ -137,8 +137,12 @@ const AssessmentDisplay = () => {
               <tr key={index}>
                 <td className="border border-gray-400 px-4 py-2">{question}</td>
                 <td className="border border-gray-400 px-4 py-2">
-                  {assessmentData[0]?.answers[index + 1]?.selectedOption ||
-                    "N/A"}
+                  {assessmentData[0]?.answers[
+                    index + 1
+                  ]?.selectedOption?.toLowerCase() === "other"
+                    ? "Other"
+                    : assessmentData[0]?.answers[index + 1]?.selectedOption ||
+                      "N/A"}
                 </td>
               </tr>
             ))}
@@ -162,7 +166,7 @@ const AssessmentDisplay = () => {
                 <strong>
                   {message.role === "user" ? "You" : "Therapist"}:
                 </strong>{" "}
-                {message.text}
+                {message.text.replace(/\bhy\b/g, "hi")}
               </p>
             ))}
           </div>
