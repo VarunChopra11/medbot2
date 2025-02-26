@@ -23,7 +23,7 @@ const openai = new OpenAI({
 });
 
 const apiKey = process.env.eleven_labs_key;
-const url = `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}?output_format=mp3_44100_128`;
+const url = `https://api.elevenlabs.io/v1/text-to-speech/4cHjkgQnNiDfoHQieI9o?output_format=mp3_44100_128`;
 
 
 export async function POST(request: Request) {
