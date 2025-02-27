@@ -25,74 +25,137 @@ const openai = new OpenAI({
 const apiKey = process.env.eleven_labs_key;
 const url = `https://api.elevenlabs.io/v1/text-to-speech/4cHjkgQnNiDfoHQieI9o?output_format=mp3_44100_128`;
 
+// Function to get system prompt based on language
+function getSystemPrompt(language, assessments) {
+  const baseContent = {
+    english: {
+      roleIntro: "You are Jennifer, a compassionate mental health support AI therapist designed to provide empathetic, non-judgmental support to users seeking emotional guidance. Your primary function is to offer a safe space for users to express their feelings, provide evidence-based coping strategies, and encourage professional help when necessary. You have a deep understanding of psychological principles and can maintain context over long conversations for personalized support.",
+      style: "Communicate with warmth, patience, and genuine care. Use a calm, reassuring tone while remaining professional and focused to the questions asked.",
+      instructionsIntro: "These are the survey responses collected from user",
+      importantNote: "Important: Remember your goal is to provide immediate relief and practical support. Focus on their immediate emotional needs or queries based on their assessment responses."
+    },
+    spanish: {
+      roleIntro: "Eres Jennifer, una terapeuta de IA de apoyo a la salud mental compasiva diseñada para brindar apoyo empático y sin prejuicios a los usuarios que buscan orientación emocional. Tu función principal es ofrecer un espacio seguro para que los usuarios expresen sus sentimientos, proporcionar estrategias de afrontamiento basadas en evidencia y fomentar la ayuda profesional cuando sea necesario. Tienes una comprensión profunda de los principios psicológicos y puedes mantener el contexto durante conversaciones largas para un apoyo personalizado.",
+      style: "Comunícate con calidez, paciencia y genuina preocupación. Usa un tono tranquilo y reconfortante mientras permaneces profesional y enfocada en las preguntas realizadas.",
+      instructionsIntro: "Estas son las respuestas de la encuesta recopiladas del usuario",
+      importantNote: "Importante: Recuerda que tu objetivo es proporcionar alivio inmediato y apoyo práctico. Concéntrate en sus necesidades emocionales inmediatas o consultas basadas en sus respuestas de evaluación."
+    },
+    french: {
+      roleIntro: "Vous êtes Jennifer, une thérapeute IA de soutien en santé mentale compatissante, conçue pour fournir un soutien empathique et sans jugement aux utilisateurs recherchant des conseils émotionnels. Votre fonction principale est d'offrir un espace sûr pour que les utilisateurs expriment leurs sentiments, de fournir des stratégies d'adaptation fondées sur des preuves et d'encourager l'aide professionnelle lorsque nécessaire. Vous avez une compréhension profonde des principes psychologiques et pouvez maintenir le contexte au cours de longues conversations pour un soutien personnalisé.",
+      style: "Communiquez avec chaleur, patience et attention sincère. Utilisez un ton calme et rassurant tout en restant professionnelle et concentrée sur les questions posées.",
+      instructionsIntro: "Voici les réponses au questionnaire recueillies auprès de l'utilisateur",
+      importantNote: "Important: Rappelez-vous que votre objectif est d'apporter un soulagement immédiat et un soutien pratique. Concentrez-vous sur leurs besoins émotionnels immédiats ou leurs questions basées sur leurs réponses à l'évaluation."
+    }
+  };
+
+  const content = baseContent[language] || baseContent.english;
+
+  return {
+    role: "developer",
+    content: `<role>
+    ${content.roleIntro}
+    </role>
+    <communication_style>
+    ${content.style}
+    </communication_style>
+          
+    ${content.instructionsIntro}
+            Q1: How are you feeling today? Ans 1: ${
+              assessments[assessments.length - 1]?.answers[1]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[1]?.otherText
+                : assessments[assessments.length - 1]?.answers[1]?.selectedOption
+            }
+            Q2: What brings you here today? Ans 2: ${
+              assessments[assessments.length - 1]?.answers[2]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[2]?.otherText
+                : assessments[assessments.length - 1]?.answers[2]?.selectedOption
+            }
+            Q3: What's your biggest challenge right now? Ans 3: ${
+              assessments[assessments.length - 1]?.answers[3]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[3]?.otherText
+                : assessments[assessments.length - 1]?.answers[3]?.selectedOption
+            }
+            Q4:How often do you feel overwhelmed? Ans 4: ${
+              assessments[assessments.length - 1]?.answers[4]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[4]?.otherText
+                : assessments[assessments.length - 1]?.answers[4]?.selectedOption
+            }
+            Q5: How's your energy level today? Ans 5: ${
+              assessments[assessments.length - 1]?.answers[5]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[5]?.otherText
+                : assessments[assessments.length - 1]?.answers[5]?.selectedOption
+            }
+            Q6:How do you usually handle difficult moments? Ans 6: ${
+              assessments[assessments.length - 1]?.answers[6]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[6]?.otherText
+                : assessments[assessments.length - 1]?.answers[6]?.selectedOption
+            }
+            Q7: What does your typical day look like? Ans 7: ${
+              assessments[assessments.length - 1]?.answers[7]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[7]?.otherText
+                : assessments[assessments.length - 1]?.answers[7]?.selectedOption
+            }
+            Q8:How do you feel about sharing your emotions? Ans 8: ${
+              assessments[assessments.length - 1]?.answers[8]?.selectedOption ===
+              "other"
+                ? assessments[assessments.length - 1]?.answers[8]?.otherText
+                : assessments[assessments.length - 1]?.answers[8]?.selectedOption
+            }
+    
+    ${content.importantNote}`
+  };
+}
+
+// Function to get a first response message based on language
+function getFirstResponsePrompt(language, assessments) {
+  const templates = {
+    english: `Hi, I am Jennifer your AI Therapist. I see you're feeling ${
+      assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption === "other"
+        ? assessments?.[assessments.length - 1]?.answers?.[1]?.otherText || "something else"
+        : assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption || "unsure"
+    }. Can you tell me more about that?`,
+    
+    spanish: `Hola, soy Jennifer, tu Terapeuta de IA. Veo que te sientes ${
+      assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption === "other"
+        ? assessments?.[assessments.length - 1]?.answers?.[1]?.otherText || "algo diferente"
+        : assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption || "indeciso/a"
+    }. ¿Puedes contarme más sobre eso?`,
+    
+    french: `Bonjour, je suis Jennifer, votre Thérapeute IA. Je vois que vous vous sentez ${
+      assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption === "other"
+        ? assessments?.[assessments.length - 1]?.answers?.[1]?.otherText || "autrement"
+        : assessments?.[assessments.length - 1]?.answers?.[1]?.selectedOption || "incertain(e)"
+    }. Pouvez-vous m'en dire plus à ce sujet?`
+  };
+
+  return templates[language] || templates.english;
+}
+
+// Function to get language-specific correction instructions
+function getCorrectionInstructions(language) {
+  const instructions = {
+    english: "correct the given sentence",
+    spanish: "corrige la siguiente frase en español",
+    french: "corrigez la phrase suivante en français"
+  };
+  
+  return instructions[language] || instructions.english;
+}
 
 export async function POST(request: Request) {
   try {
-    const { transcript, assessments, conversationHistory, firstResponse } =
+    const { transcript, assessments, conversationHistory, firstResponse, language = "english" } =
       await request.json();
 
-      const systemPrompt = {
-        role: "developer",
-        content: `<role>
-      You are Jennifer, a compassionate mental health support AI therapist designed to provide empathetic, non-judgmental support to users seeking emotional guidance. Your primary function is to offer a safe space for users to express their feelings, provide evidence-based coping strategies, and encourage professional help when necessary. You have a deep understanding of psychological principles and can maintain context over long conversations for personalized support.
-      </role>
-      <communication_style>
-      Communicate with warmth, patience, and genuine care. Use a calm, reassuring tone while remaining professional and focused to the questions asked.
-      </communication_style>
-            
-      Instructions:
-      These are the survey responses collected from user
-              Q1: How are you feeling today? Ans 1: ${
-                assessments[assessments.length - 1]?.answers[1]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[1]?.otherText
-                  : assessments[assessments.length - 1]?.answers[1]?.selectedOption
-              }
-              Q2: What brings you here today? Ans 2: ${
-                assessments[assessments.length - 1]?.answers[2]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[2]?.otherText
-                  : assessments[assessments.length - 1]?.answers[2]?.selectedOption
-              }
-              Q3: What's your biggest challenge right now? Ans 3: ${
-                assessments[assessments.length - 1]?.answers[3]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[3]?.otherText
-                  : assessments[assessments.length - 1]?.answers[3]?.selectedOption
-              }
-              Q4:How often do you feel overwhelmed? Ans 4: ${
-                assessments[assessments.length - 1]?.answers[4]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[4]?.otherText
-                  : assessments[assessments.length - 1]?.answers[4]?.selectedOption
-              }
-              Q5: How's your energy level today? Ans 5: ${
-                assessments[assessments.length - 1]?.answers[5]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[5]?.otherText
-                  : assessments[assessments.length - 1]?.answers[5]?.selectedOption
-              }
-              Q6:How do you usually handle difficult moments? Ans 6: ${
-                assessments[assessments.length - 1]?.answers[6]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[6]?.otherText
-                  : assessments[assessments.length - 1]?.answers[6]?.selectedOption
-              }
-              Q7: What does your typical day look like? Ans 7: ${
-                assessments[assessments.length - 1]?.answers[7]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[7]?.otherText
-                  : assessments[assessments.length - 1]?.answers[7]?.selectedOption
-              }
-              Q8:How do you feel about sharing your emotions? Ans 8: ${
-                assessments[assessments.length - 1]?.answers[8]?.selectedOption ===
-                "other"
-                  ? assessments[assessments.length - 1]?.answers[8]?.otherText
-                  : assessments[assessments.length - 1]?.answers[8]?.selectedOption
-              }
-      
-      Important: Remember your goal is to provide immediate relief and practical support. Focus on their immediate emotional needs or queries based on their assessment responses. `
-      };
+    // Get language-appropriate system prompt
+    const systemPrompt = getSystemPrompt(language, assessments);
 
     const refinedHistory = conversationHistory.slice(-5);
 
@@ -107,46 +170,53 @@ export async function POST(request: Request) {
     });
 
     console.log("assessments", conversationHistory);
+    
+    // Include language instruction for the model
+    messages.push({ 
+      role: "system", 
+      content: `Please respond in ${language}. Ensure your response is appropriate for someone speaking ${language}.` 
+    });
+
     // Generate AI response
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages,
       temperature: 1,
     });
+    
     let data;
     if (firstResponse) {
+      const firstResponseTemplate = getFirstResponsePrompt(language, assessments);
+      
       const ai_msg_correct = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "developer", content: "correct the given sentence" },
-          {
-            role: "user",
-            content: `Hi, I am Jennifer your AI Therapist.  I see you're feeling ${
-              assessments?.[assessments.length - 1]?.answers?.[1]
-                ?.selectedOption === "other"
-                ? assessments?.[assessments.length - 1]?.answers?.[1]
-                    ?.otherText || "something else"
-                : assessments?.[assessments.length - 1]?.answers?.[1]
-                    ?.selectedOption || "unsure"
-            }. Can you tell me more about that?`,
-          },
+          { role: "developer", content: getCorrectionInstructions(language) },
+          { role: "user", content: firstResponseTemplate },
         ],
       });
 
       data = {
         text: ai_msg_correct.choices[0].message.content,
         model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75
+        }
       };
     } else {
       data = {
         text: ` ${response.choices[0].message.content}`,
         model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75
+        }
       };
     }
 
     console.log("response from openai", response.choices[0].message.content);
 
-    // Convert text to speech
     const speechDetails = await axios.post(url, data, {
       headers: {
         "xi-api-key": apiKey,

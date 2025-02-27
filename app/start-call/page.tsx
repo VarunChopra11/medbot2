@@ -158,6 +158,7 @@ export default function Page() {
           assessments,
           conversationHistory: updatedHistory,
           firstResponse: true,
+          language: localStorage.getItem("selectedLanguage") || "english"
         });
         const audioData = response.data.audioData;
         const binaryAudio = atob(audioData);
@@ -338,7 +339,7 @@ export default function Page() {
         assessments,
         conversationHistory: updatedHistory,
         firstResponse: false,
-        // Send the updated history, not the old one
+        language: localStorage.getItem("selectedLanguage") || "english"
       });
 
       // Process audio response

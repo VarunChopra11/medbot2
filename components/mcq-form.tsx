@@ -1,6 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { changeLanguage } from "../utils/i18n"; // Import your i18n utility
 
 interface Option {
   value: string;
@@ -24,6 +26,15 @@ interface FormAnswers {
 }
 
 const questions: Question[] = [
+  {
+    id: 0,
+    question: "What language do you want to proceed in?",
+    options: [
+      { value: "english", label: "English" },
+      { value: "spanish", label: "Spanish" },
+      { value: "french", label: "French" },
+    ],
+  },
   {
     id: 1,
     question: "How are you feeling today?",
@@ -118,16 +129,27 @@ const questions: Question[] = [
 
 const TypeformMentalHealth = () => {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<FormAnswers>({});
   const [otherText, setOtherText] = useState("");
   const [loadingFormRead, setLoadingFormRead] = useState(true);
 
+  useEffect(() => {
+    // Ensure language is set from localStorage on component load
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem("selectedLanguage");
+      if (savedLanguage) {
+        i18n.changeLanguage(savedLanguage);
+      }
+    }
+  }, [i18n]);
+
   const isLastQuestion = currentQuestion === questions.length - 1;
 
   const handleAnswer = (selectedOption: string, text?: string) => {
     const questionId = questions[currentQuestion].id;
-
+  
     setAnswers((prev) => ({
       ...prev,
       [questionId]: {
@@ -135,6 +157,11 @@ const TypeformMentalHealth = () => {
         otherText: selectedOption === "other" ? text || "" : undefined,
       },
     }));
+  
+    if (questionId === 0) {
+      localStorage.setItem("selectedLanguage", selectedOption);
+      changeLanguage(selectedOption); // Change language immediately
+    }
   };
 
   const handleOtherSubmit = () => {
@@ -179,15 +206,22 @@ const TypeformMentalHealth = () => {
   const currentAnswer = answers[currentQuestionData.id];
   const isOptionSelected = Boolean(currentAnswer?.selectedOption);
 
+  // Translate the current question and options
+  const translatedQuestion = t(currentQuestionData.question);
+  const translatedOptions = currentQuestionData.options.map(option => ({
+    ...option,
+    label: t(option.label)
+  }));
+
   return loadingFormRead ? (
     <div className="min-h-screen p-4 bg-gradient-to-r from-[#8a820b] via-[#24afcb] to-[#1e2652] flex items-center justify-center">
       <div className="w-full max-w-4xl p-6 sm:p-10 lg:p-20 bg-white rounded-lg shadow-lg lg:max-w-[80rem]">
         <h2 className="text-xl font-semibold mb-6 text-center font-sans">
-          {currentQuestionData.question}
+          {translatedQuestion}
         </h2>
 
         <div className="flex flex-wrap gap-3 justify-center mb-6">
-          {currentQuestionData.options.map((option) => (
+          {translatedOptions.map((option) => (
             <button
               key={option.value}
               onClick={() => handleAnswer(option.value)}
@@ -211,7 +245,7 @@ const TypeformMentalHealth = () => {
                 setOtherText(e.target.value);
                 handleAnswer("other", e.target.value); // Update answers dynamically
               }}
-              placeholder="Please specify..."
+              placeholder={t("Please specify...")}
               className="w-full p-3 border-2 border-black rounded-lg min-h-[80px] sm:min-h-[100px]"
               autoFocus
             />
@@ -229,7 +263,7 @@ const TypeformMentalHealth = () => {
                   : "bg-gray-300 border-gray-400 cursor-not-allowed text-gray-400"
               }`}
           >
-            {isLastQuestion ? "Connect to Therapist" : "Next"}
+            {isLastQuestion ? t("Connect to Therapist") : t("Next")}
           </button>
         </div>
       </div>
@@ -238,7 +272,7 @@ const TypeformMentalHealth = () => {
     <div className="min-h-screen p-4 bg-gradient-to-r from-[#8a820b] via-[#24afcb] to-[#1e2652] flex items-center justify-center">
       <div className="w-full max-w-4xl p-6 sm:p-10 lg:p-20 bg-white rounded-lg shadow-lg">
         <h2 className="text-center text-lg sm:text-xl">
-          The therapist is reviewing your form...
+          {t("The therapist is reviewing your form...")}
         </h2>
       </div>
     </div>
