@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { cn } from "@/utils";
 import { Poppins } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Havenly Therapy",
@@ -34,7 +35,7 @@ export default function RootLayout({
       <body
         className={cn(GeistSans.variable, GeistMono.variable, " font-poppins")}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
