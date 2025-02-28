@@ -18,7 +18,7 @@ export default function ClientComponent({
   }>({});
 
   const getAssessments = (): AssessmentResponse[] => {
-    const data = localStorage.getItem("mentalHealthAssessments");
+    const data = sessionStorage.getItem("mentalHealthAssessments");
     return data ? JSON.parse(data) : [];
   };
 

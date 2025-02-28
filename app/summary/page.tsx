@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { useTranslation } from "react-i18next";
-import { changeLanguage } from "../../utils/i18n"; // Adjust the path as needed for your project structure
 
 const AssessmentDisplay = () => {
   const { t } = useTranslation();
@@ -26,12 +25,12 @@ const AssessmentDisplay = () => {
 
     const doc = new jsPDF();
 
-    // Get the conversation history and assessments from localStorage
+    // Get the conversation history and assessments from sessionStorage
     const conversationHistory = JSON.parse(
-      localStorage.getItem("conversationHistory") || "[]"
+      sessionStorage.getItem("conversationHistory") || "[]"
     );
     const assessments = JSON.parse(
-      localStorage.getItem("mentalHealthAssessments") || "[]"
+      sessionStorage.getItem("mentalHealthAssessments") || "[]"
     );
 
     // Create a container div for rendering
@@ -87,9 +86,9 @@ const AssessmentDisplay = () => {
     doc.save("conversation_report.pdf");
   };
 
-  const emptyLocalStorage = () => {
-    localStorage.removeItem("mentalHealthAssessments");
-    localStorage.removeItem("conversationHistory");
+  const emptysessionStorage = () => {
+    sessionStorage.removeItem("mentalHealthAssessments");
+    sessionStorage.removeItem("conversationHistory");
     setAssessmentData([]);
     setConversationHistory([]);
   };
@@ -99,12 +98,12 @@ const AssessmentDisplay = () => {
     setCurrentLanguage(language);
   };
 
-  // Retrieve data from localStorage on component mount
+  // Retrieve data from sessionStorage on component mount
   useEffect(() => {
-    const storedAssessmentData = localStorage.getItem(
+    const storedAssessmentData = sessionStorage.getItem(
       "mentalHealthAssessments"
     );
-    const storedConversationHistory = localStorage.getItem(
+    const storedConversationHistory = sessionStorage.getItem(
       "conversationHistory"
     );
 
@@ -117,7 +116,7 @@ const AssessmentDisplay = () => {
     }
 
     // Get the saved language
-    const savedLanguage = localStorage.getItem("selectedLanguage") || "english";
+    const savedLanguage = sessionStorage.getItem("selectedLanguage") || "english";
     setCurrentLanguage(savedLanguage);
   }, []);
 
@@ -201,7 +200,7 @@ const AssessmentDisplay = () => {
 
         <div className="text-center mt-6">
           <button
-            onClick={emptyLocalStorage}
+            onClick={emptysessionStorage}
             className="bg-black text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-800"
           >
             {t("Delete and Reset")}

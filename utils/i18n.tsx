@@ -291,7 +291,7 @@ const resources = {
 // Helper function to safely get language preference
 const getSavedLanguage = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem("selectedLanguage") || "english";
+    return sessionStorage.getItem("selectedLanguage") || "english";
   }
   return "english"; // Default fallback for server-side rendering
 };
@@ -316,7 +316,7 @@ if (!i18n.isInitialized) {
 // Function to change language programmatically
 export const changeLanguage = (language: string) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem("selectedLanguage", language);
+    sessionStorage.setItem("selectedLanguage", language);
   }
   i18n.changeLanguage(language);
 };

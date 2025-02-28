@@ -136,9 +136,9 @@ const TypeformMentalHealth = () => {
   const [loadingFormRead, setLoadingFormRead] = useState(true);
 
   useEffect(() => {
-    // Ensure language is set from localStorage on component load
+    // Ensure language is set from sessionStorage on component load
     if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem("selectedLanguage");
+      const savedLanguage = sessionStorage.getItem("selectedLanguage");
       if (savedLanguage) {
         i18n.changeLanguage(savedLanguage);
       }
@@ -159,7 +159,7 @@ const TypeformMentalHealth = () => {
     }));
   
     if (questionId === 0) {
-      localStorage.setItem("selectedLanguage", selectedOption);
+      sessionStorage.setItem("selectedLanguage", selectedOption);
       changeLanguage(selectedOption); // Change language immediately
     }
   };
@@ -186,10 +186,10 @@ const TypeformMentalHealth = () => {
     };
 
     try {
-      const existingData = localStorage.getItem("mentalHealthAssessments");
+      const existingData = sessionStorage.getItem("mentalHealthAssessments");
       const assessments = existingData ? JSON.parse(existingData) : [];
       assessments.push(newResponse);
-      localStorage.setItem(
+      sessionStorage.setItem(
         "mentalHealthAssessments",
         JSON.stringify(assessments)
       );

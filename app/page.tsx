@@ -2,13 +2,14 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TypeformMentalHealth from "@/components/mcq-form";
+import withAuth from "@/utils/withAuth";
 
-export default function Page() {
+function Page() {
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const mentalHealthAssessments = localStorage.getItem(
+      const mentalHealthAssessments = sessionStorage.getItem(
         "mentalHealthAssessments"
       );
       if (mentalHealthAssessments) {
@@ -23,3 +24,5 @@ export default function Page() {
     </div>
   );
 }
+
+export default withAuth(Page);

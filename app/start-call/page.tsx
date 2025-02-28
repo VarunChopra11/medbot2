@@ -130,9 +130,9 @@ export default function Page() {
   }, [messages]);
 
   useEffect(() => {
-    const existingData = localStorage.getItem("mentalHealthAssessments");
+    const existingData = sessionStorage.getItem("mentalHealthAssessments");
     const assessments = existingData ? JSON.parse(existingData) : [];
-    const existingHistory = localStorage.getItem("conversationHistory");
+    const existingHistory = sessionStorage.getItem("conversationHistory");
     const conversationHistory: Message[] = existingHistory
       ? JSON.parse(existingHistory)
       : [];
@@ -149,7 +149,7 @@ export default function Page() {
 
         // Update conversation history to include the new user message
         let updatedHistory = [...conversationHistory, userMessage];
-        localStorage.setItem(
+        sessionStorage.setItem(
           "conversationHistory",
           JSON.stringify(updatedHistory)
         );
@@ -158,7 +158,7 @@ export default function Page() {
           assessments,
           conversationHistory: updatedHistory,
           firstResponse: true,
-          language: localStorage.getItem("selectedLanguage") || "english"
+          language: sessionStorage.getItem("selectedLanguage") || "english"
         });
         const audioData = response.data.audioData;
         const binaryAudio = atob(audioData);
@@ -197,7 +197,7 @@ export default function Page() {
             userMessage,
             aiMessage,
           ];
-          localStorage.setItem(
+          sessionStorage.setItem(
             "conversationHistory",
             JSON.stringify(updatedHistory)
           );
@@ -312,12 +312,12 @@ export default function Page() {
 
     try {
       console.log("transcript", transcript);
-      const existingHistory = localStorage.getItem("conversationHistory");
+      const existingHistory = sessionStorage.getItem("conversationHistory");
       const conversationHistory: Message[] = existingHistory
         ? JSON.parse(existingHistory)
         : [];
 
-      const existingData = localStorage.getItem("mentalHealthAssessments");
+      const existingData = sessionStorage.getItem("mentalHealthAssessments");
 
       const userMessage: Message = {
         id: Date.now().toString(),
@@ -328,7 +328,7 @@ export default function Page() {
 
       // Update conversation history to include the new user message
       let updatedHistory = [...conversationHistory, userMessage];
-      localStorage.setItem(
+      sessionStorage.setItem(
         "conversationHistory",
         JSON.stringify(updatedHistory)
       );
@@ -339,7 +339,7 @@ export default function Page() {
         assessments,
         conversationHistory: updatedHistory,
         firstResponse: false,
-        language: localStorage.getItem("selectedLanguage") || "english"
+        language: sessionStorage.getItem("selectedLanguage") || "english"
       });
 
       // Process audio response
@@ -371,7 +371,7 @@ export default function Page() {
 
         // Update history again to include AI response
         updatedHistory = [...updatedHistory, aiMessage];
-        localStorage.setItem(
+        sessionStorage.setItem(
           "conversationHistory",
           JSON.stringify(updatedHistory)
         );
