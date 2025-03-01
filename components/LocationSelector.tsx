@@ -103,7 +103,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               : "border-black"
           }`}
         >
-          <option value="">{t("Select State")}</option>
+          <option value="">{t("Select State/County")}</option>
           {states.map((state) => (
             <option key={state.isoCode} value={state.isoCode}>
               {state.name}
@@ -127,7 +127,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               : "border-black"
           }`}
         >
-          <option value="">{t("Select City")}</option>
+          <option value="">{t("Select City/Village")}</option>
           {cities.map((city) => (
             <option key={city.name} value={city.name}>
               {city.name}
