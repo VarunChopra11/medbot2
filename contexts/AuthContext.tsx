@@ -25,10 +25,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const authStatus = sessionStorage.getItem("isAuthenticated");
-      setIsAuthenticated(authStatus === "true");
+      
+      // Important: Always reset the cookie on initial load
+      // This ensures cookies are in sync with session storage
+      if (authStatus === "true") {
+        document.cookie = "isAuthenticated=true; path=/";
+        setIsAuthenticated(true);
+      } else {
+        // Explicitly set cookie to false when no valid auth found
+        document.cookie = "isAuthenticated=false; path=/; max-age=0";
+        setIsAuthenticated(false);
+        
+        // Redirect to login if not already there
+        if (window.location.pathname !== "/login") {
+          router.push("/login");
+        }
+      }
+      
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   const login = (pin: string): boolean => {
     if (pin === PIN) {
