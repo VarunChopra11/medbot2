@@ -22,9 +22,10 @@
     "@uploadthing/react": "^7.1.5",
     "@vercel/blob": "^0.27.1",
     "@wavesurfer/react": "^1.0.9",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "country-state-city": "^3.2.1",
     "elevenlabs": "^1.50.5",
     "elevenlabs-js": "^1.2.6",
     "framer-motion": "^11.2.10",
@@ -54,6 +55,7 @@
     "wavesurfer.js": "^7.9.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { changeLanguage } from "../utils/i18n"; // Import your i18n utility
+import LocationSelector from "../components/LocationSelector";
 
 interface Option {
   value: string;
@@ -19,6 +20,11 @@ interface Question {
 interface FormAnswer {
   selectedOption: string;
   otherText?: string;
+  location?: {
+    country: string;
+    state: string;
+    city: string;
+  };
 }
 
 interface FormAnswers {
@@ -125,6 +131,11 @@ const questions: Question[] = [
       { value: "Uncomfortable", label: "Uncomfortable" },
     ],
   },
+  {
+    id: 9,
+    question: "What is your location?",
+    options: [],
+  },
 ];
 
 const TypeformMentalHealth = () => {
@@ -135,8 +146,12 @@ const TypeformMentalHealth = () => {
   const [otherText, setOtherText] = useState("");
   const [loadingFormRead, setLoadingFormRead] = useState(true);
 
+  const [country, setCountry] = useState('');
+  const [state, setState] = useState('');
+  const [city, setCity] = useState('');
+  const [locationSelected, setLocationSelected] = useState(false);
+
   useEffect(() => {
-    // Ensure language is set from sessionStorage on component load
     if (typeof window !== 'undefined') {
       const savedLanguage = sessionStorage.getItem("selectedLanguage");
       if (savedLanguage) {
@@ -144,6 +159,26 @@ const TypeformMentalHealth = () => {
       }
     }
   }, [i18n]);
+
+  useEffect(() => {
+    if (currentQuestion === questions.length - 1) {
+      if (country) {
+        const questionId = questions[currentQuestion].id;
+        setAnswers((prev) => ({
+          ...prev,
+          [questionId]: {
+            selectedOption: "location",
+            location: {
+              country,
+              state,
+              city
+            }
+          },
+        }));
+        setLocationSelected(true);
+      }
+    }
+  }, [country, state, city, currentQuestion]);
 
   const isLastQuestion = currentQuestion === questions.length - 1;
 
@@ -160,7 +195,7 @@ const TypeformMentalHealth = () => {
   
     if (questionId === 0) {
       sessionStorage.setItem("selectedLanguage", selectedOption);
-      changeLanguage(selectedOption); // Change language immediately
+      changeLanguage(selectedOption); 
     }
   };
 
@@ -204,9 +239,9 @@ const TypeformMentalHealth = () => {
 
   const currentQuestionData = questions[currentQuestion];
   const currentAnswer = answers[currentQuestionData.id];
-  const isOptionSelected = Boolean(currentAnswer?.selectedOption);
+  const isOptionSelected = Boolean(currentAnswer?.selectedOption) || 
+    (isLastQuestion && locationSelected);
 
-  // Translate the current question and options
   const translatedQuestion = t(currentQuestionData.question);
   const translatedOptions = currentQuestionData.options.map(option => ({
     ...option,
@@ -221,20 +256,32 @@ const TypeformMentalHealth = () => {
         </h2>
 
         <div className="flex flex-wrap gap-3 justify-center mb-6">
-          {translatedOptions.map((option) => (
-            <button
+            {currentQuestionData.question === "What is your location?" ? (
+                <LocationSelector 
+                onSelectCountry={(value) => {
+                  setCountry(value);
+                  setLocationSelected(Boolean(value));
+                }}
+                onSelectState={setState}
+                onSelectCity={setCity}
+              />
+              
+            ) : (
+            translatedOptions.map((option) => (
+              <button
               key={option.value}
               onClick={() => handleAnswer(option.value)}
-              className={`w-full sm:w-auto px-12  py-6 border-2 text-center transition-all duration-200 text-[12px] rounded-2xl font-sans
+              className={`w-full sm:w-auto px-12 py-6 border-2 text-center transition-all duration-200 text-[12px] rounded-2xl font-sans
               ${
                 currentAnswer?.selectedOption === option.value
-                  ? "bg-[#Adff2f] border-black"
-                  : "bg-white border-black"
+                ? "bg-[#Adff2f] border-black"
+                : "bg-white border-black"
               }`}
-            >
+              >
               {option.label}
-            </button>
-          ))}
+              </button>
+            ))
+            )}
         </div>
 
         {currentAnswer?.selectedOption === "other" && (
@@ -243,7 +290,7 @@ const TypeformMentalHealth = () => {
               value={otherText}
               onChange={(e) => {
                 setOtherText(e.target.value);
-                handleAnswer("other", e.target.value); // Update answers dynamically
+                handleAnswer("other", e.target.value);
               }}
               placeholder={t("Please specify...")}
               className="w-full p-3 border-2 border-black rounded-lg min-h-[80px] sm:min-h-[100px]"

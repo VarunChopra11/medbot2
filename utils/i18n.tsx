@@ -14,6 +14,7 @@ const resources = {
       "How do you usually handle difficult moments?": "How do you usually handle difficult moments?",
       "What does your typical day look like?": "What does your typical day look like?",
       "How do you feel about sharing your emotions?": "How do you feel about sharing your emotions?",
+      "What is your location?": "What is your location?",
       
       // Common options
       "English": "English",
@@ -78,6 +79,11 @@ const resources = {
       "Next": "Next",
       "Connect to Therapist": "Connect to Therapist",
       "The therapist is reviewing your form...": "The therapist is reviewing your form...",
+      "JENNIFER": "JENNIFER",
+      "AI THERAPIST": "AI THERAPIST",
+      "END CALL": "END CALL",
+      "RECORD": "RECORD",
+      "STOP": "STOP",
     
       "Assessment Results": "Assessment Results",
       "Question": "Question",
@@ -109,6 +115,7 @@ const resources = {
       "How do you usually handle difficult moments?": "¿Cómo sueles manejar los momentos difíciles?",
       "What does your typical day look like?": "¿Cómo es tu día típico?",
       "How do you feel about sharing your emotions?": "¿Cómo te sientes al compartir tus emociones?",
+      "What is your location?": "¿Cuál es tu ubicación?",
       
       // Common options
       "English": "Inglés",
@@ -173,6 +180,12 @@ const resources = {
       "Next": "Siguiente",
       "Connect to Therapist": "Conectar con el Terapeuta",
       "The therapist is reviewing your form...": "El terapeuta está revisando tu formulario...",
+      "JENNIFER": "JENNIFER",
+      "AI THERAPIST": "TERAPEUTA DE IA",
+      "END CALL": "FINALIZAR",
+      "RECORD": "GRABAR",
+      "STOP": "DETENER",
+      "Record your message": "Graba tu mensaje",
     
       "Assessment Results": "Resultados de la Evaluación",
       "Question": "Pregunta",
@@ -203,6 +216,7 @@ const resources = {
       "How do you usually handle difficult moments?": "Comment gérez-vous habituellement les moments difficiles ?",
       "What does your typical day look like?": "À quoi ressemble votre journée typique ?",
       "How do you feel about sharing your emotions?": "Comment vous sentez-vous à l'idée de partager vos émotions ?",
+      "What is your location?": "Quelle est votre localisation ?",
       
       // Common options
       "English": "Anglais",
@@ -267,6 +281,12 @@ const resources = {
       "Next": "Suivant",
       "Connect to Therapist": "Se connecter au thérapeute",
       "The therapist is reviewing your form...": "Le thérapeute examine votre formulaire...",
+      "JENNIFER": "JENNIFER",
+      "AI THERAPIST": "THÉRAPEUTE IA",
+      "END CALL": "TERMINER",
+      "RECORD": "ENREGISTRER",
+      "STOP": "ARRÊTER",
+      "Record your message": "Enregistrez votre message",
     
       "Assessment Results": "Résultats de l'Évaluation",
       "Question": "Question",

@@ -19,8 +19,8 @@ import { first } from "remeda";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next"; 
 
-// Message type interface
 interface Message {
   id: string;
   role: "ai" | "user";
@@ -31,6 +31,7 @@ interface Message {
 
 export default function Page() {
   const router = useRouter();
+  const { t, i18n } = useTranslation(); 
   const [messages, setMessages] = useState<Message[]>([]);
   const wavesurferRefs = useRef<{ [key: string]: any }>({});
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,6 +52,15 @@ export default function Page() {
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLanguage = sessionStorage.getItem("selectedLanguage");
+      if (savedLanguage) {
+        i18n.changeLanguage(savedLanguage);
+      }
+    }
+  }, [i18n]);
+
   const onReady = (ws, messageId) => {
     wavesurferRefs.current[messageId] = ws;
     setIsPlaying(false);
@@ -67,7 +77,6 @@ export default function Page() {
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const animationFrameRefs = useRef<{ [key: string]: number }>({});
 
-  // Initialize audio states for new messages
   useEffect(() => {
     messages.forEach((message) => {
       if (!audioStates[message.id]) {
@@ -84,7 +93,6 @@ export default function Page() {
     console.log(messages);
   }, [messages]);
 
-  // Handle audio setup for each message
   useEffect(() => {
     messages.forEach((message) => {
       if (message.audioBlob || message.audioUrl) {
@@ -409,10 +417,10 @@ export default function Page() {
               />
               <div>
                 <div className="text-[12px] font-semibold text-white font-sans">
-                  JENNIFER
+                  {t('JENNIFER')}
                 </div>
                 <div className="text-[#FFFFFF80] font-semibold text-[10px] font-sans">
-                  AI THERAPIST
+                  {t('AI THERAPIST')}
                 </div>
               </div>
             </div>
@@ -420,11 +428,10 @@ export default function Page() {
               className="bg-red-500 text-[10px] rounded-lg h-[22px] w-[63px] text-white"
               onClick={EndCall}
             >
-              END CALL
+              {t('END CALL')}
             </button>
           </div>
 
-          {/* Messages */}
           <div className="z-[2] bg-black/40 w-full overflow-x-hidden h-[535px] pt-4 overflow-y-auto scroll-container">
             {messages.map((message) => (
               <div
@@ -469,31 +476,28 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Controls */}
           <div className="z-[2] bg-black/60 h-[46px] w-full flex justify-between items-center px-4">
             <span className="text-[#ffffffb3] text-[11px]">
-              Record your message
+              {t('Record your message')}
             </span>
             {!isRecording ? (
               <button
                 className="bg-[#248a52] text-[10px] rounded-lg h-[22px] w-[63px] text-white"
                 onClick={startRecording}
               >
-                RECORD
+                {t('RECORD')}
               </button>
             ) : (
               <button
                 className="bg-[#248a52] text-[10px] rounded-lg h-[22px] w-[63px] text-white"
                 onClick={stopRecording}
               >
-                STOP
+                {t('STOP')}
               </button>
             )}
           </div>
         </div>
       </div>
-
-      {/* Background */}
       <div className="fixed top-0 left-0 w-full h-full z-[1] bg-[url('https://images.unsplash.com/photo-1451186859696-371d9477be93?crop=entropy&fit=crop&fm=jpg&h=975&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80&w=1925')] bg-no-repeat bg-cover blur-[80px] scale-[1.2]"></div>
     </div>
   );

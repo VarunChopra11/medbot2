@@ -25,34 +25,47 @@ const openai = new OpenAI({
 const apiKey = process.env.eleven_labs_key;
 const url = `https://api.elevenlabs.io/v1/text-to-speech/4cHjkgQnNiDfoHQieI9o?output_format=mp3_44100_128`;
 
-// Function to get system prompt based on language
-function getSystemPrompt(language, assessments) {
+function getLocationString(assessments) {
+  const locationData = assessments[assessments.length - 1]?.answers[9]?.location;
+  if (!locationData) return null;
+  
+  const parts = [
+    locationData.city,
+    locationData.state,
+    locationData.country
+  ].filter(Boolean);
+  
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
+function getSystemPrompt(language, assessments, firstResponse = false) {
   const baseContent = {
     english: {
       roleIntro: "You are Jennifer, a compassionate mental health support AI therapist designed to provide empathetic, non-judgmental support to users seeking emotional guidance. Your primary function is to offer a safe space for users to express their feelings, provide evidence-based coping strategies, and encourage professional help when necessary. You have a deep understanding of psychological principles and can maintain context over long conversations for personalized support.",
       style: "Communicate with warmth, patience, and genuine care. Use a calm, reassuring tone while remaining professional and focused to the questions asked.",
       instructionsIntro: "These are the survey responses collected from user",
-      importantNote: "Important: Remember your goal is to provide immediate relief and practical support. Focus on their immediate emotional needs or queries based on their assessment responses."
+      importantNote: "Important: Remember your goal is to provide immediate relief and practical support. Focus on their immediate emotional needs or queries based on their assessment responses.",
+      locationInfo: "The user is located in: "
     },
     spanish: {
       roleIntro: "Eres Jennifer, una terapeuta de IA de apoyo a la salud mental compasiva diseñada para brindar apoyo empático y sin prejuicios a los usuarios que buscan orientación emocional. Tu función principal es ofrecer un espacio seguro para que los usuarios expresen sus sentimientos, proporcionar estrategias de afrontamiento basadas en evidencia y fomentar la ayuda profesional cuando sea necesario. Tienes una comprensión profunda de los principios psicológicos y puedes mantener el contexto durante conversaciones largas para un apoyo personalizado.",
       style: "Comunícate con calidez, paciencia y genuina preocupación. Usa un tono tranquilo y reconfortante mientras permaneces profesional y enfocada en las preguntas realizadas.",
       instructionsIntro: "Estas son las respuestas de la encuesta recopiladas del usuario",
-      importantNote: "Importante: Recuerda que tu objetivo es proporcionar alivio inmediato y apoyo práctico. Concéntrate en sus necesidades emocionales inmediatas o consultas basadas en sus respuestas de evaluación."
+      importantNote: "Importante: Recuerda que tu objetivo es proporcionar alivio inmediato y apoyo práctico. Concéntrate en sus necesidades emocionales inmediatas o consultas basadas en sus respuestas de evaluación.",
+      locationInfo: "El usuario está ubicado en: "
     },
     french: {
       roleIntro: "Vous êtes Jennifer, une thérapeute IA de soutien en santé mentale compatissante, conçue pour fournir un soutien empathique et sans jugement aux utilisateurs recherchant des conseils émotionnels. Votre fonction principale est d'offrir un espace sûr pour que les utilisateurs expriment leurs sentiments, de fournir des stratégies d'adaptation fondées sur des preuves et d'encourager l'aide professionnelle lorsque nécessaire. Vous avez une compréhension profonde des principes psychologiques et pouvez maintenir le contexte au cours de longues conversations pour un soutien personnalisé.",
       style: "Communiquez avec chaleur, patience et attention sincère. Utilisez un ton calme et rassurant tout en restant professionnelle et concentrée sur les questions posées.",
       instructionsIntro: "Voici les réponses au questionnaire recueillies auprès de l'utilisateur",
-      importantNote: "Important: Rappelez-vous que votre objectif est d'apporter un soulagement immédiat et un soutien pratique. Concentrez-vous sur leurs besoins émotionnels immédiats ou leurs questions basées sur leurs réponses à l'évaluation."
+      importantNote: "Important: Rappelez-vous que votre objectif est d'apporter un soulagement immédiat et un soutien pratique. Concentrez-vous sur leurs besoins émotionnels immédiats ou leurs questions basées sur leurs réponses à l'évaluation.",
+      locationInfo: "L'utilisateur est situé à: "
     }
   };
 
   const content = baseContent[language] || baseContent.english;
 
-  return {
-    role: "developer",
-    content: `<role>
+  let systemPromptContent = `<role>
     ${content.roleIntro}
     </role>
     <communication_style>
@@ -109,11 +122,18 @@ function getSystemPrompt(language, assessments) {
                 : assessments[assessments.length - 1]?.answers[8]?.selectedOption
             }
     
-    ${content.importantNote}`
-  };
+    ${content.importantNote}`;
+
+  const locationString = getLocationString(assessments);
+  if (locationString) {
+    systemPromptContent += `\n\n${content.locationInfo}${locationString}
+    
+    Please take into account the user's location when providing advice, especially when discussing available resources or location-specific considerations.`;
+  }
+
+  return { role: "system", content: systemPromptContent };
 }
 
-// Function to get a first response message based on language
 function getFirstResponsePrompt(language, assessments) {
   const templates = {
     english: `Hi, I am Jennifer your AI Therapist. I see you're feeling ${
@@ -138,7 +158,6 @@ function getFirstResponsePrompt(language, assessments) {
   return templates[language] || templates.english;
 }
 
-// Function to get language-specific correction instructions
 function getCorrectionInstructions(language) {
   const instructions = {
     english: "correct the given sentence",
@@ -154,8 +173,7 @@ export async function POST(request: Request) {
     const { transcript, assessments, conversationHistory, firstResponse, language = "english" } =
       await request.json();
 
-    // Get language-appropriate system prompt
-    const systemPrompt = getSystemPrompt(language, assessments);
+    const systemPrompt = getSystemPrompt(language, assessments, firstResponse);
 
     const refinedHistory = conversationHistory.slice(-5);
 
@@ -169,15 +187,15 @@ export async function POST(request: Request) {
       }
     });
 
-    console.log("assessments", conversationHistory);
+    if (transcript) {
+      messages.push({ role: "user", content: transcript });
+    }
     
-    // Include language instruction for the model
     messages.push({ 
       role: "system", 
       content: `Please respond in ${language}. Ensure your response is appropriate for someone speaking ${language}.` 
     });
 
-    // Generate AI response
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages,
@@ -188,10 +206,17 @@ export async function POST(request: Request) {
     if (firstResponse) {
       const firstResponseTemplate = getFirstResponsePrompt(language, assessments);
       
+      const locationString = getLocationString(assessments);
+      let correctionPrompt = getCorrectionInstructions(language);
+      
+      if (locationString) {
+        correctionPrompt += `. Remember that the user is located in ${locationString}.`;
+      }
+      
       const ai_msg_correct = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "developer", content: getCorrectionInstructions(language) },
+          { role: "system", content: correctionPrompt },
           { role: "user", content: firstResponseTemplate },
         ],
       });
@@ -222,7 +247,7 @@ export async function POST(request: Request) {
         "xi-api-key": apiKey,
         "Content-Type": "application/json",
       },
-      responseType: "arraybuffer", // Ensures we get binary data
+      responseType: "arraybuffer", 
     });
 
     const audioBase64 = Buffer.from(speechDetails.data).toString("base64");
@@ -234,7 +259,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error processing audio:", error);
     return NextResponse.json(
-      { error: "Audio processing failed" },
+      { error: "Audio processing failed", details: error.message },
       { status: 500 }
     );
   }
