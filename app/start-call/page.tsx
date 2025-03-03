@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { Mic, Square, Play, Download } from "lucide-react";
+import { Mic, Square, Play, Download, Globe } from "lucide-react";
 import { AudioVisualizer } from "react-audio-visualize";
 import axios from "axios";
 import WavesurferPlayer from "@wavesurfer/react";
@@ -19,7 +19,8 @@ import { first } from "remeda";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
+import '../../utils/i18n';
 
 interface Message {
   id: string;
@@ -44,6 +45,8 @@ export default function Page() {
       duration: number;
     };
   }>({});
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState("english");
 
   const {
     transcript,
@@ -56,10 +59,18 @@ export default function Page() {
     if (typeof window !== 'undefined') {
       const savedLanguage = sessionStorage.getItem("selectedLanguage");
       if (savedLanguage) {
+        setCurrentLanguage(savedLanguage);
         i18n.changeLanguage(savedLanguage);
       }
     }
   }, [i18n]);
+
+  const changeLanguage = (language: string) => {
+    sessionStorage.setItem("selectedLanguage", language);
+    setCurrentLanguage(language);
+    i18n.changeLanguage(language);
+    setShowLanguageMenu(false);
+  };
 
   const onReady = (ws, messageId) => {
     wavesurferRefs.current[messageId] = ws;
@@ -407,6 +418,42 @@ export default function Page() {
     <div className="relative w-full h-screen flex justify-center items-center">
       <div className="absolute w-full max-w-[640px] lg:mt-20 h-[100vh] max-h-[100vh] z-[2] overflow-hidden flex flex-col justify-between p-4 md:p-0">
         <div className="w-full h-full mx-auto">
+          {/* Language Menu Bar */}
+          <div className="z-[3] bg-black/80 relative w-full h-[40px] flex items-center px-4 justify-center">
+            <div className="relative">
+              <button 
+                className="flex items-center gap-2 text-white text-[12px] font-semibold"
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              >
+                <Globe size={16} />
+                {currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1)}
+              </button>
+              
+              {showLanguageMenu && (
+                <div className="absolute top-[30px] left-0 bg-black/90 w-[120px] rounded-lg overflow-hidden z-10">
+                  <button 
+                    className={`w-full text-left px-3 py-2 text-[12px] ${currentLanguage === 'english' ? 'bg-[#248A52] text-white' : 'text-white hover:bg-gray-700'}`}
+                    onClick={() => changeLanguage('english')}
+                  >
+                    English
+                  </button>
+                  <button 
+                    className={`w-full text-left px-3 py-2 text-[12px] ${currentLanguage === 'spanish' ? 'bg-[#248A52] text-white' : 'text-white hover:bg-gray-700'}`}
+                    onClick={() => changeLanguage('spanish')}
+                  >
+                    Español
+                  </button>
+                  <button 
+                    className={`w-full text-left px-3 py-2 text-[12px] ${currentLanguage === 'french' ? 'bg-[#248A52] text-white' : 'text-white hover:bg-gray-700'}`}
+                    onClick={() => changeLanguage('french')}
+                  >
+                    Français
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Header */}
           <div className="z-[2] bg-black/60 relative flex-[0_1_45px] w-full h-[45px] flex items-center px-4 justify-between">
             <div className="flex items-center gap-2">
@@ -432,7 +479,7 @@ export default function Page() {
             </button>
           </div>
 
-          <div className="z-[2] bg-black/40 w-full overflow-x-hidden h-[535px] pt-4 overflow-y-auto scroll-container">
+          <div className="z-[2] bg-black/40 w-full overflow-x-hidden h-[495px] pt-4 overflow-y-auto scroll-container">
             {messages.map((message) => (
               <div
                 key={message.id}
