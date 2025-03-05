@@ -469,9 +469,9 @@ export default function Page() {
   };
 
   return (
-    <div className="relative w-full h-screen flex justify-center items-center">
-      <div className="absolute w-full max-w-[640px] lg:mt-20 h-[100vh] max-h-[100vh] z-[2] overflow-hidden flex flex-col justify-between p-4 md:p-0">
-        <div className="w-full h-full mx-auto">
+    <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
+      <div className="absolute w-full max-w-[640px] h-[calc(100vh-100px)] max-h-[calc(100vh-100px)] z-[2] flex flex-col justify-center p-4 md:p-0">
+        <div className="flex flex-col h-full">
           {/* Language Menu Bar */}
           <div className="z-[3] bg-black/80 relative w-full h-[40px] flex items-center px-4 justify-center">
             <div className="relative">
@@ -509,7 +509,7 @@ export default function Page() {
           </div>
 
           {/* Header */}
-          <div className="z-[2] bg-black/60 relative flex-[0_1_45px] w-full h-[45px] flex items-center px-4 justify-between">
+          <div className="z-[2] bg-black/60 relative flex-0 w-full h-[45px] flex items-center px-4 justify-between">
             <div className="flex items-center gap-2">
               <img
                 src="therapist.png"
@@ -533,50 +533,54 @@ export default function Page() {
             </button>
           </div>
 
-          <div className="z-[2] bg-black/40 w-full overflow-x-hidden h-[495px] pt-4 overflow-y-auto scroll-container">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`w-full lg:max-w-[460px] max-w-[300px] mx-auto ${
-                  message.role === "ai"
-                    ? "ml-4 bg-black/40"
-                    : "ml-auto lg:ml-[10rem] bg-gradient-to-br from-[#248A52] to-[#257287]"
-                } rounded-lg mt-4 p-4 flex items-center`}
-              >
-                <button
-                  onClick={() => togglePlayback(message.id, message.audioUrl)}
-                  className={`w-[55px] h-[55px] rounded-full border-white border-[2px] text-[30px] transition-colors duration-300 ${
-                    audioStates[message.id]?.isPlaying
-                      ? "bg-[greenyellow]"
-                      : "bg-[#20b2aa]"
-                  }`}
+          {/* Messages Container */}
+          <div className="z-[2] bg-black/40 w-full flex-1 overflow-y-auto scroll-container py-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`w-full lg:max-w-[460px] max-w-[300px] mx-auto ${
+                    message.role === "ai"
+                      ? "ml-4 bg-black/40"
+                      : "ml-auto lg:ml-[10rem] bg-gradient-to-br from-[#248A52] to-[#257287]"
+                  } rounded-lg p-4 flex items-center`}
                 >
-                  <img
-                    src={
+                  <button
+                    onClick={() => togglePlayback(message.id, message.audioUrl)}
+                    className={`w-[55px] h-[55px] rounded-full border-white border-[2px] text-[30px] transition-colors duration-300 ${
                       audioStates[message.id]?.isPlaying
-                        ? "pause.png "
-                        : "play.png"
-                    }
-                    alt="Play/Pause"
-                    className="w-[30px] h-[30px] mx-auto"
-                  />
-                </button>
-                <div className="w-full pl-3">
-                  {message.audioUrl && (
-                    <WavesurferPlayer
-                      height={80}
-                      waveColor="rgb(255, 255, 255, 0.5)"
-                      progressColor="rgb(255, 255, 255, 0.8)"
-                      url={message.audioUrl}
-                      onReady={(ws) => onReady(ws, message.id)}
-                      onPlayPause={() => togglePlayback(message.id)}
+                        ? "bg-[greenyellow]"
+                        : "bg-[#20b2aa]"
+                    }`}
+                  >
+                    <img
+                      src={
+                        audioStates[message.id]?.isPlaying
+                          ? "pause.png "
+                          : "play.png"
+                      }
+                      alt="Play/Pause"
+                      className="w-[30px] h-[30px] mx-auto"
                     />
-                  )}
+                  </button>
+                  <div className="w-full pl-3">
+                    {message.audioUrl && (
+                      <WavesurferPlayer
+                        height={80}
+                        waveColor="rgb(255, 255, 255, 0.5)"
+                        progressColor="rgb(255, 255, 255, 0.8)"
+                        url={message.audioUrl}
+                        onReady={(ws) => onReady(ws, message.id)}
+                        onPlayPause={() => togglePlayback(message.id)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
+          {/* Footer */}
           <div className="z-[2] bg-black/60 h-[46px] w-full flex justify-between items-center px-4">
             <span className="text-[#ffffffb3] text-[11px]">
               {t('Record your message')}

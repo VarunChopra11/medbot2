@@ -115,35 +115,28 @@ export async function POST(request: Request) {
       assessments, 
       conversationHistory, 
       firstResponse, 
-      language = language || "english"
+      language = "english"
     } = await request.json();
-
-    const systemPrompt = getSystemPrompt(language, assessments);
-    const locationString = getLocationString(assessments);
-    
-    const refinedHistory = conversationHistory.slice(-5);
-    let messages = [systemPrompt];
-
-    refinedHistory.forEach((message) => {
-      if (message.role === "user") {
-        messages.push({ role: "user", content: message.text });
-      } else if (message.role === "ai") {
-        messages.push({ role: "assistant", content: message.text });
-      }
-    });
-
-    if (transcript) {
-      messages.push({ role: "user", content: transcript });
-    }
-    
-    messages.push({ 
-      role: "system", 
-      content: `Please respond in ${language}. Ensure your response is appropriate for someone speaking ${language}.` 
-    });
 
     let aiResponseText;
     
-    if (firstResponse) {
+    // Check for special key phrases only if transcript exists
+    if (transcript) {
+      const transcriptLower = transcript.toLowerCase();
+      
+      if (transcriptLower.includes("the car is blue")) {
+        // Use the hardcoded response for "The car is blue"
+        aiResponseText = "Hi Abel, how are you";
+      } else if (transcriptLower.includes("the car is red")) {
+        // Use the hardcoded response for "The car is red"
+        aiResponseText = "Hi Cain, how are you";
+      } else {
+        aiResponseText = await processNormalFlow(transcript, assessments, conversationHistory, firstResponse, language);
+      }
+    } else if (firstResponse) {
+      const systemPrompt = getSystemPrompt(language, assessments);
+      const locationString = getLocationString(assessments);
+      
       const firstResponseTemplate = getFirstResponsePrompt(language, assessments);
       const correctionPrompt = getCorrectionInstructions(language, locationString);
       
@@ -157,13 +150,7 @@ export async function POST(request: Request) {
       
       aiResponseText = ai_msg_correct.choices[0].message.content;
     } else {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages,
-        temperature: 1,
-      });
-      
-      aiResponseText = response.choices[0].message.content;
+      aiResponseText = "I didn't catch that. Could you please repeat?";
     }
 
     const speechData = {
@@ -195,5 +182,53 @@ export async function POST(request: Request) {
       { error: "Processing failed", details: error.message },
       { status: 500 }
     );
+  }
+}
+
+async function processNormalFlow(transcript, assessments, conversationHistory, firstResponse, language) {
+  const systemPrompt = getSystemPrompt(language, assessments);
+  const locationString = getLocationString(assessments);
+  
+  const refinedHistory = conversationHistory.slice(-5);
+  let messages = [systemPrompt];
+
+  refinedHistory.forEach((message) => {
+    if (message.role === "user") {
+      messages.push({ role: "user", content: message.text });
+    } else if (message.role === "ai") {
+      messages.push({ role: "assistant", content: message.text });
+    }
+  });
+
+  if (transcript) {
+    messages.push({ role: "user", content: transcript });
+  }
+  
+  messages.push({ 
+    role: "system", 
+    content: `Please respond in ${language}. Ensure your response is appropriate for someone speaking ${language}.` 
+  });
+  
+  if (firstResponse) {
+    const firstResponseTemplate = getFirstResponsePrompt(language, assessments);
+    const correctionPrompt = getCorrectionInstructions(language, locationString);
+    
+    const ai_msg_correct = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: correctionPrompt },
+        { role: "user", content: firstResponseTemplate },
+      ],
+    });
+    
+    return ai_msg_correct.choices[0].message.content;
+  } else {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages,
+      temperature: 1,
+    });
+    
+    return response.choices[0].message.content;
   }
 }
