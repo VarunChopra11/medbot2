@@ -99,11 +99,11 @@ export default function Page() {
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
-  } = useSpeechRecognition({
-    language: currentLanguage === 'english' ? 'en-US' : 
-              currentLanguage === 'spanish' ? 'es-ES' : 
-              currentLanguage === 'french' ? 'fr-FR' : 'en-US'
-  });
+  } = useSpeechRecognition({ language: 'fr-FR' });
+
+  useEffect(() => {
+    console.log("Detected Transcript:", transcript);
+  }, [transcript]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
