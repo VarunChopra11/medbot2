@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { changeLanguage } from "../utils/i18n"; // Import your i18n utility
-import LocationSelector from "../components/LocationSelector";
+import { changeLanguage } from "../utils/i18n";
+import CountrySelector from "../components/LocationSelector";
 
 interface Option {
   value: string;
@@ -22,8 +22,6 @@ interface FormAnswer {
   otherText?: string;
   location?: {
     country: string;
-    state: string;
-    city: string;
   };
 }
 
@@ -147,8 +145,6 @@ const TypeformMentalHealth = () => {
   const [loadingFormRead, setLoadingFormRead] = useState(true);
 
   const [country, setCountry] = useState('');
-  const [state, setState] = useState('');
-  const [city, setCity] = useState('');
   const [locationSelected, setLocationSelected] = useState(false);
 
   useEffect(() => {
@@ -169,16 +165,14 @@ const TypeformMentalHealth = () => {
           [questionId]: {
             selectedOption: "location",
             location: {
-              country,
-              state,
-              city
+              country
             }
           },
         }));
         setLocationSelected(true);
       }
     }
-  }, [country, state, city, currentQuestion]);
+  }, [country, currentQuestion]);
 
   const isLastQuestion = currentQuestion === questions.length - 1;
 
@@ -257,14 +251,12 @@ const TypeformMentalHealth = () => {
 
         <div className="flex flex-wrap gap-3 justify-center mb-6">
             {currentQuestionData.question === "What is your location?" ? (
-                <LocationSelector 
-                onSelectCountry={(value) => {
-                  setCountry(value);
-                  setLocationSelected(Boolean(value));
-                }}
-                onSelectState={setState}
-                onSelectCity={setCity}
-              />
+                <CountrySelector 
+                  onSelectCountry={(value) => {
+                    setCountry(value);
+                    setLocationSelected(Boolean(value));
+                  }}
+                />
               
             ) : (
             translatedOptions.map((option) => (

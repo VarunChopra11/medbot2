@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { Mic, Square, Play, Download, Globe } from "lucide-react";
+import { Mic, Square, Play, Download, Globe, Info } from "lucide-react";
 import { AudioVisualizer } from "react-audio-visualize";
 import axios from "axios";
 import WavesurferPlayer from "@wavesurfer/react";
@@ -21,6 +21,7 @@ import html2canvas from "html2canvas";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import '../../utils/i18n';
+import { EmergencyNumber } from "../../EmergencyNumbers.ts";
 
 interface Message {
   id: string;
@@ -29,6 +30,51 @@ interface Message {
   audioUrl?: string;
   timestamp: Date;
 }
+
+const DisclaimerFooter = () => {
+  const [emergencyNumber, setEmergencyNumber] = useState("1-800-273-8255");
+
+  useEffect(() => {
+    const getCountryFromMentalHealthAssessments = (): string | null => {
+      try {
+        const storedAssessments = sessionStorage.getItem('mentalHealthAssessments');
+        const parsedAssessments = storedAssessments ? JSON.parse(storedAssessments) : [];
+        
+        if (Array.isArray(parsedAssessments) && parsedAssessments.length > 0) {
+          return parsedAssessments[0]?.answers?.['9']?.location?.country || null;
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error parsing mental health assessments:', error);
+        return null;
+      }
+    };
+
+    const country = getCountryFromMentalHealthAssessments();
+    const number = country && EmergencyNumber[country] ? EmergencyNumber[country] : "1-800-273-8255";
+    setEmergencyNumber(number);
+  }, []);
+
+  return (
+    <footer className="fixed bottom-0 left-0 w-full py-2 px-4 z-50">
+      <div className="max-w-4xl mx-auto flex items-start justify-center space-x-1">
+        <Info className="text-white/80 w-4 h-4 flex-shrink-0 mt-[1px]" />
+        <p className="text-[10px] text-white/70 text-center font-semibold">
+          This AI therapist is not a qualified mental health professional and should not replace licensed therapeutic care.
+          If you feel you are at risk or experiencing a mental health emergency, please call{" "}
+          <a 
+            href={`tel:${emergencyNumber}`} 
+            className="font-bold text-white underline hover:text-red-300 transition-colors"
+          >
+            {emergencyNumber}
+          </a>{" "}
+          immediately.
+        </p>
+      </div>
+    </footer>
+  );
+};
 
 export default function Page() {
   const router = useRouter();
@@ -53,7 +99,11 @@ export default function Page() {
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
-  } = useSpeechRecognition();
+  } = useSpeechRecognition({
+    language: currentLanguage === 'english' ? 'en-US' : 
+              currentLanguage === 'spanish' ? 'es-ES' : 
+              currentLanguage === 'french' ? 'fr-FR' : 'en-US'
+  });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -546,6 +596,7 @@ export default function Page() {
         </div>
       </div>
       <div className="fixed top-0 left-0 w-full h-full z-[1] bg-[url('https://images.unsplash.com/photo-1451186859696-371d9477be93?crop=entropy&fit=crop&fm=jpg&h=975&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80&w=1925')] bg-no-repeat bg-cover blur-[80px] scale-[1.2]"></div>
+      <DisclaimerFooter />
     </div>
   );
 }
