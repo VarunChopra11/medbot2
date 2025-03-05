@@ -99,7 +99,7 @@ export default function Page() {
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
-  } = useSpeechRecognition({ language: 'fr-FR' });
+  } = useSpeechRecognition();
 
   useEffect(() => {
     console.log("Detected Transcript:", transcript);
@@ -336,7 +336,11 @@ export default function Page() {
   };
   const startRecording = async () => {
     try {
-      SpeechRecognition.startListening();
+      SpeechRecognition.startListening({
+        language: currentLanguage === 'english' ? 'en-US' : 
+                  currentLanguage === 'spanish' ? 'es-ES' : 
+                  currentLanguage === 'french' ? 'fr-FR' : 'en-US'
+      });
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];

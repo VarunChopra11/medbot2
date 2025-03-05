@@ -20,7 +20,7 @@ function Page() {
 
   return (
     <div>
-      <h2>Version: 1.2 </h2>
+      <h2>Version: 1.3 </h2>
       <TypeformMentalHealth />
     </div>
   );
