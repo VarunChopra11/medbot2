@@ -134,18 +134,6 @@ const AssessmentDisplay = () => {
   return (
     <div className="bg-teal-900 min-h-screen flex flex-col items-center lg:p-6 p-2">
       <div className="bg-teal-100 lg:p-6 p-2 rounded-lg shadow-md w-full overflow-hidden max-w-5xl">
-        <div className="mb-4 flex justify-end">
-          <select
-            value={currentLanguage}
-            onChange={(e) => handleChangeLanguage(e.target.value)}
-            className="bg-white px-3 py-1 rounded-lg shadow-sm border"
-          >
-            <option value="english">{t("English")}</option>
-            <option value="spanish">{t("Spanish")}</option>
-            <option value="french">{t("French")}</option>
-          </select>
-        </div>
-
         <h1 className="text-2xl font-bold mb-4 text-center">
           {t("Assessment Results")}
         </h1>

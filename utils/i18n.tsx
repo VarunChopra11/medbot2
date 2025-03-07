@@ -207,16 +207,16 @@ const resources = {
   french: {
     translation: {
       // Questions
-      "What language do you want to proceed in?": "Dans quelle langue souhaitez-vous continuer ?",
-      "How are you feeling today?": "Comment vous sentez-vous aujourd'hui ?",
-      "What brings you here today?": "Qu'est-ce qui vous amène ici aujourd'hui ?",
-      "What's your biggest challenge right now?": "Quel est votre plus grand défi en ce moment ?",
-      "How often do you feel overwhelmed?": "À quelle fréquence vous sentez-vous dépassé(e) ?",
-      "How's your energy level today?": "Comment est votre niveau d'énergie aujourd'hui ?",
-      "How do you usually handle difficult moments?": "Comment gérez-vous habituellement les moments difficiles ?",
-      "What does your typical day look like?": "À quoi ressemble votre journée typique ?",
-      "How do you feel about sharing your emotions?": "Comment vous sentez-vous à l'idée de partager vos émotions ?",
-      "What is your location?": "Quelle est votre localisation ?",
+      "What language do you want to proceed in?": "Dans quelle langue souhaitez-vous continuer?",
+      "How are you feeling today?": "Comment vous sentez-vous aujourd'hui?",
+      "What brings you here today?": "Qu'est-ce qui vous amène ici aujourd'hui?",
+      "What's your biggest challenge right now?": "Quel est votre plus grand défi en ce moment?",
+      "How often do you feel overwhelmed?": "À quelle fréquence vous sentez-vous dépassé(e)?",
+      "How's your energy level today?": "Comment est votre niveau d'énergie aujourd'hui?",
+      "How do you usually handle difficult moments?": "Comment gérez-vous habituellement les moments difficiles?",
+      "What does your typical day look like?": "À quoi ressemble votre journée typique?",
+      "How do you feel about sharing your emotions?": "Comment vous sentez-vous à l'idée de partager vos émotions?",
+      "What is your location?": "Quelle est votre localisation?",
       
       // Common options
       "English": "Anglais",
